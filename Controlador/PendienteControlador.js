@@ -1,19 +1,27 @@
 const Pendiente = require('../Modelo/Pendiente');
 const User = require('../Modelo/Usuario');
+const mongoose = require('mongoose');
+
 
 // Crear un pendiente
 const createPendiente = async (req, res) => {
     try {
-        const { userId, titulo, descripcion, fecha, estado, prioridad } = req.body;
+        console.log("Datos recibidos:", req.body);
+        const { Usuario, Titulo, Descripcion, Fecha, Estado, Prioridad } = req.body;
+
+        // Verificar que los datos obligatorios estén presentes
+        if (!Titulo || !Descripcion || !Fecha) {
+            return res.status(400).json({ message: "Todos los campos obligatorios deben estar completos." });
+        }
 
         // Crear un nuevo pendiente
         const nuevoPendiente = new Pendiente({
-            Titulo: titulo,
-            Descripcion: descripcion,
-            Fecha: fecha,
-            Estado: estado,
-            Prioridad: prioridad,
-            Usuario: userId
+            Titulo,
+            Descripcion,
+            Fecha,
+            Estado: Estado || "Pendiente",
+            Prioridad: Prioridad || "Media",
+            Usuario
         });
 
         // Guardar el pendiente
@@ -21,23 +29,46 @@ const createPendiente = async (req, res) => {
         const pendienteGuardado = await nuevoPendiente.save();
 
         // Actualizar el usuario con la referencia al nuevo pendiente
-        await User.findByIdAndUpdate(userId, { $push: { Pendientes: pendienteGuardado._id } });
+        await User.findByIdAndUpdate(Usuario, { $push: { Pendientes: pendienteGuardado._id } });
 
         res.status(201).json(pendienteGuardado);
     } catch (error) {
-        res.status(500).json({ message: 'Ocurrió un error ' + error.message });
+        console.error("Error al crear pendiente:", error.message);
+        res.status(500).json({ message: "Ocurrió un error " + error.message });
     }
-}
+};
+
+module.exports = {
+    createPendiente
+};
+
 
 // Recuperar todos los pendientes
 const getPendientes = async (req, res) => {
     try {
-        const pendientes = await Pendiente.find().populate('Usuario', 'Nombre Correo');
+        const { usuarioId } = req.params;
+        console.log("Usuario ID recibido:", usuarioId); // Verifica qué se recibe
+
+        if (!mongoose.Types.ObjectId.isValid(usuarioId)) {
+            return res.status(400).json({ message: 'ID de usuario no válido' });
+        }
+
+        const pendientes = await Pendiente.find({ Usuario: usuarioId }).populate('Usuario', 'Nombre Correo');
+        console.log("Pendientes encontrados:", pendientes); // Imprime los resultados de la consulta
+
+        if (pendientes.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron pendientes para este usuario' });
+        }
+
         res.status(200).json(pendientes);
     } catch (error) {
+        console.error(`Error al recuperar los pendientes:`, error);
         res.status(500).json({ message: 'Ocurrió un error ' + error.message });
     }
-}
+};
+
+
+
 
 // Recuperar un pendiente por su ID
 const getPendienteById = async (req, res) => {
@@ -53,18 +84,44 @@ const getPendienteById = async (req, res) => {
     }
 }
 
-// Actualizar un pendiente por su ID
+
+// Actualizar un pendiente por su ID para un usuario específico
 const updatePendienteById = async (req, res) => {
     try {
+        // Suponer que pasas el ID del usuario como parámetro o en el body
         const { id } = req.params;
-        req.body.FechaActualizacion = Date.now();
-        const pendienteActualizado = await Pendiente.findByIdAndUpdate(id, req.body, { new: true });
+        const userId = req.body.usuarioId; // O de donde obtengas el ID del usuario
+
+        // Buscar y actualizar el pendiente que pertenece al usuario
+        const pendienteActualizado = await Pendiente.findOneAndUpdate(
+            { 
+                _id: id,     // Buscar por el ID del pendiente
+                usuario: userId // Y asegurarse que pertenece al usuario
+            }, 
+            {
+                ...req.body, // Spread de los campos a actualizar
+                FechaActualizacion: Date.now() // Actualizar fecha de modificación
+            }, 
+            { 
+                new: true,   // Devolver el documento actualizado
+                runValidators: true // Ejecutar validadores del esquema
+            }
+        );
+
+        // Si no se encuentra el pendiente
         if (!pendienteActualizado) {
-            return res.status(404).json({ message: 'Pendiente no encontrado' });
+            return res.status(404).json({ 
+                message: 'Pendiente no encontrado o no tienes permisos para actualizarlo' 
+            });
         }
+
         res.status(200).json(pendienteActualizado);
     } catch (error) {
-        res.status(500).json({ message: 'Ocurrió un error ' + error.message });
+        console.error('Error al actualizar pendiente:', error);
+        res.status(500).json({ 
+            message: 'Ocurrió un error al actualizar el pendiente',
+            error: error.message 
+        });
     }
 }
 

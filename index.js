@@ -3,11 +3,15 @@ const mongoose = require('mongoose');
 // Importando librería CORS
 const cors = require('cors');
 
+
 // Importando rutas de usuario
 const userRoute = require('./Ruta/UsuarioRuta');
 const Pendiente = require('./Ruta/PendienteRuta');
 
 const app = express();
+app.use(cors({
+    origin: '*' // Permite todas las conexiones (solo para desarrollo)
+  }));
 
 // Agregando el parser JSON de Express
 app.use(express.json());
@@ -38,14 +42,14 @@ app.use('/api/pendientes', Pendiente);
 // Realizar petición de conexión a MongoDB
 async function connectDB() {
     try {
-        await mongoose.connect('mongodb://localhost:27017/IA', {
+        await mongoose.connect('mongodb+srv://ivanarcosgarcia:gvskwe2uQawd0vYJ@cluster0.gkxrl.mongodb.net/IA', {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
         console.log('Se estableció la conexión a base de datos exitosamente');
         app.listen(3000, '0.0.0.0', () => {
-            console.log('Servidor trabajando en el puerto 3000');
-        });
+            console.log('Servidor iniciado en puerto 3000 en todas las interfaces');
+          });
     } catch (error) {
         console.error('Ocurrió un error en la conexión a la base de datos: ', error);
     }

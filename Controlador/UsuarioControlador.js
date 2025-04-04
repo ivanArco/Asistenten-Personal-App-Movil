@@ -45,13 +45,24 @@ const getUsersById = async (req, res) => {
 // Recuperar un usuario por su correo
 const getUsersByCorreo = async (req, res) => {
     try {
-        const { Correo } = req.params;
-        const usuario = await User.find({ "Correo": Correo });
-        res.status(200).json(usuario);
+      const { correo } = req.params;
+      console.log("Buscando usuario con correo:", correo); // Debugging
+  
+      const usuario = await User.findOne({ Correo: correo }); // Busca en la BD
+  
+      if (!usuario) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+  
+      res.status(200).json(usuario);
     } catch (error) {
-        res.status(500).json({ message: 'Ocurrió un error ' + error.message });
+      console.error("Error en getUsersByCorreo:", error); // Debugging
+      res.status(500).json({ message: 'Ocurrió un error ' + error.message });
     }
-}
+};
+
+  
+
 
 // Recuperar un usuario por su correo y contraseña
 const getUsersByCorreoPass = async (req, res) => {

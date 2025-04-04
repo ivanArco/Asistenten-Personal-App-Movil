@@ -12,7 +12,7 @@ const {
 router.post('/add', createPendiente);
 
 // Endpoint para la recuperación de todos los pendientes
-router.get('/', getPendientes);
+router.get('/usuario/:usuarioId', getPendientes);
 
 // Endpoint para la recuperación de un pendiente usando su identificador
 router.get('/:id', getPendienteById);
