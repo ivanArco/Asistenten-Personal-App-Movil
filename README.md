@@ -11,7 +11,16 @@ El proyecto está estructurado de la siguiente manera:
 ├── index.js # Archivo principal del servidor Express. ├── package.json # Archivo de configuración del proyecto. 
 ├── README.md # Este archivo de documentación. └── .env # Variables de entorno (opcional para la configuración).
 
+## Este proyecto utiliza las siguientes tecnologías:
 
+- **Node.js**: Entorno de ejecución de JavaScript del lado del servidor.
+- **Express.js**: Framework minimalista para construir aplicaciones web y APIs en Node.js.
+- **Mongoose**: Librería ODM (Object Data Modeling) para interactuar con MongoDB de manera sencilla.
+- **MongoDB**: Base de datos NoSQL que almacena los datos de manera flexible y escalable.
+- **CORS**: Middleware que habilita solicitudes entre diferentes orígenes (Cross-Origin Resource Sharing).
+- **Nodemon**: Herramienta para reiniciar automáticamente el servidor durante el desarrollo al detectar cambios en el código fuente.
+
+Estas tecnologías permiten crear una API backend eficiente para gestionar tareas (pendientes) y asociarlas a usuarios específicos.
 
 ### **Archivos Principales**
 
