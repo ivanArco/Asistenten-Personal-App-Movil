@@ -56,7 +56,7 @@ El proyecto está estructurado de la siguiente manera:
    git clone https://github.com/tu-usuario/mi-proyecto.git
    cd mi-proyecto
 
-###Endpoints de la API
+### **Endpoints de la API**
 
 La API está organizada en los siguientes endpoints:
 
